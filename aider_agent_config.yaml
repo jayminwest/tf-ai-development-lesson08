@@ -28,3 +28,15 @@ context_read_only:
 
 # Evaluator mode, currently only "default" is supported.
 evaluator: "default"
+coder_model: "deepseek-coder-33b-instruct"
+evaluator_model: "deepseek-coder-33b-instruct"
+max_iterations: 3
+execution_command: "python src/main.py"
+context_editable:
+  - "src/main.py"
+  - "src/utils.py"
+context_read_only:
+  - "README.md"
+  - "requirements.txt"
+evaluator: "default"
+prompt: "default_prompt.md"

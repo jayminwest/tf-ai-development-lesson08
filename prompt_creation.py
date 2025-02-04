@@ -76,18 +76,20 @@ class AiderAgent:
 
     def build_structured_prompt(self, high_level_idea: str) -> str:
         """
-        Use Aider's chat (simulating an /ask command) to generate a structured prompt.
+        Use Aider's run command to generate a structured prompt.
         The response is expected to be JSON with keys: "high_level", "mid_level", "low_level".
         """
         ask_prompt = f"""I have the following high-level idea: "{high_level_idea}".
-Please inspect the current code base and determine what is needed to implement this idea.
-Then, create a detailed prompt that is structured into three parts:
-  1. High-Level Prompt: Describe the overall vision and objectives.
-  2. Mid-Level Prompt: Break down the idea into components and intermediate steps.
-  3. Low-Level Prompt: Provide detailed actionable tasks with examples.
-Return your answer in JSON format with the keys "high_level", "mid_level", and "low_level".
+Please analyze this idea and return a JSON response with the following structure:
+{{
+    "high_level": "Overall vision and objectives",
+    "mid_level": "Components and intermediate steps",
+    "low_level": "Detailed actionable tasks with examples"
+}}
+
+Do not make any code changes. Only return the JSON response.
 """
-        response = self.coder.chat(ask_prompt)
+        response = self.coder.run(ask_prompt)
         try:
             prompt_json = json.loads(response)
             structured_prompt = (
