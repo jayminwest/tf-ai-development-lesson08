@@ -82,9 +82,27 @@ class AiderAgent:
         ask_prompt = f"""I have the following high-level idea: "{high_level_idea}".
 Please analyze this idea and return a JSON response with the following structure:
 {{
-    "high_level": "Overall vision and objectives",
-    "mid_level": "Components and intermediate steps",
-    "low_level": "Detailed actionable tasks with examples"
+    "high_level_goals": ["List of high level goals"],
+    "mid_level_goals": ["List of concrete, measurable objectives"],
+    "implementation_guidelines": {{
+        "technical_details": ["Important technical details"],
+        "dependencies": ["Dependencies and requirements"],
+        "coding_standards": ["Coding standards to follow"],
+        "other_guidance": ["Other technical guidance"]
+    }},
+    "project_context": {{
+        "beginning_files": ["List of files that exist at start"],
+        "ending_files": ["List of files that will exist at end"]
+    }},
+    "low_level_goals": [
+        {{
+            "task": "Task description",
+            "prompt": "What prompt would run to complete this task",
+            "file": "What file to work on",
+            "function": "What function to work on",
+            "details": "Additional details for consistency"
+        }}
+    ]
 }}
 
 Do not make any code changes. Only return the JSON response.
@@ -92,11 +110,52 @@ Do not make any code changes. Only return the JSON response.
         response = self.coder.run(ask_prompt)
         try:
             prompt_json = json.loads(response)
-            structured_prompt = (
-                f"High-Level Prompt:\n{prompt_json.get('high_level', '').strip()}\n\n"
-                f"Mid-Level Prompt:\n{prompt_json.get('mid_level', '').strip()}\n\n"
-                f"Low-Level Prompt:\n{prompt_json.get('low_level', '').strip()}\n"
-            )
+            structured_prompt = "# Architect Prompt Template\n"
+            structured_prompt += "Process this file working through each step to ensure each objective is met.\n\n"
+            
+            # High Level Goals
+            structured_prompt += "## High Level Goals\n\n"
+            for goal in prompt_json.get('high_level_goals', []):
+                structured_prompt += f"- {goal}\n"
+            
+            # Mid Level Goals
+            structured_prompt += "\n## Mid Level Goals\n\n"
+            for goal in prompt_json.get('mid_level_goals', []):
+                structured_prompt += f"- {goal}\n"
+            
+            # Implementation Guidelines
+            structured_prompt += "\n## Implementation Guidelines\n"
+            impl = prompt_json.get('implementation_guidelines', {})
+            for detail in impl.get('technical_details', []):
+                structured_prompt += f"- {detail}\n"
+            for dep in impl.get('dependencies', []):
+                structured_prompt += f"- {dep}\n"
+            for std in impl.get('coding_standards', []):
+                structured_prompt += f"- {std}\n"
+            for guide in impl.get('other_guidance', []):
+                structured_prompt += f"- {guide}\n"
+            
+            # Project Context
+            structured_prompt += "\n## Project Context\n\n"
+            structured_prompt += "### Beginning files\n"
+            for file in prompt_json.get('project_context', {}).get('beginning_files', []):
+                structured_prompt += f"- {file}\n"
+            
+            structured_prompt += "\n### Ending files\n"
+            for file in prompt_json.get('project_context', {}).get('ending_files', []):
+                structured_prompt += f"- {file}\n"
+            
+            # Low Level Goals
+            structured_prompt += "\n## Low Level Goals\n"
+            structured_prompt += "> Ordered from first to last\n\n"
+            for i, task in enumerate(prompt_json.get('low_level_goals', []), 1):
+                structured_prompt += f"{i}. **{task.get('task', '')}**  \n"
+                structured_prompt += "```code-example\n"
+                structured_prompt += f"What prompt would you run to complete this task? {task.get('prompt', '')}\n"
+                structured_prompt += f"What file do you want to work on? {task.get('file', '')}\n"
+                structured_prompt += f"What function do you want to work on? {task.get('function', '')}\n"
+                structured_prompt += f"What are details you want to add to ensure consistency? {task.get('details', '')}\n"
+                structured_prompt += "```\n\n"
         except Exception as e:
             print("Error parsing structured prompt:", e)
             structured_prompt = response  # fallback to raw response
