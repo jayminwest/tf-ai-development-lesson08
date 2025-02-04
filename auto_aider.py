@@ -217,7 +217,7 @@ Return JSON with the structure: {{
     "success": bool,
     "feedback": string or null
 }}"""
-        response = self.coder.chat(evaluation_prompt)
+        response = self.coder.run(evaluation_prompt)
         try:
             evaluation_json = json.loads(response)
             evaluation = EvaluationResult(**evaluation_json)
@@ -233,7 +233,7 @@ Return JSON with the structure: {{
         """
         review_prompt = "Perform a final automated review of the updated project. Return JSON with structure: {\"review_passed\": bool}"
         print("[K] Performing final automated review...")
-        response = self.coder.chat(review_prompt)
+        response = self.coder.run(review_prompt)
         try:
             review_json = json.loads(response)
             return review_json.get("review_passed", False)
