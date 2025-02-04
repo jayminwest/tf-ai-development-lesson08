@@ -74,12 +74,35 @@ class AiderAgent:
 
         return AiderAgentConfig(**config_dict)
 
-    def build_structured_prompt(self, high_level_idea: str) -> str:
+    def build_structured_prompt(self, high_level_idea: str, iterations: int = 3) -> str:
         """
-        Use Aider's run command to generate a structured prompt.
-        The response is expected to be JSON with keys: "high_level", "mid_level", "low_level".
+        Use Aider's run command to generate a structured prompt iteratively.
+        Each iteration examines the project structure and refines the prompt.
         """
-        ask_prompt = f"""I have the following high-level idea: "{high_level_idea}".
+        current_prompt = high_level_idea
+        
+        for i in range(iterations):
+            print(f"\nIteration {i+1}/{iterations} - Analyzing project structure and refining prompt...")
+            
+            analyze_prompt = f"""Analyze the current project structure and this idea: "{current_prompt}"
+            
+Based on the repository map and existing files, suggest improvements to make this prompt more specific and actionable.
+Focus on:
+1. Technical details that align with existing code
+2. Dependencies and requirements already present
+3. File structure and organization patterns
+4. Coding standards visible in the codebase
+
+Return only the improved prompt idea, no other text."""
+
+            # Get improved high-level idea
+            improved_idea = self.coder.run(analyze_prompt).strip()
+            current_prompt = improved_idea
+            
+            print(f"Refined idea: {current_prompt}")
+            
+        # Now generate the final structured prompt
+        ask_prompt = f"""Based on thorough analysis of the project structure, implement this idea: "{current_prompt}".
 Please analyze this idea and return a JSON response with the following structure:
 {{
     "high_level_goals": ["List of high level goals"],
