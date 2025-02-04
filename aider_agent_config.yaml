@@ -1,42 +1,23 @@
-# Sample configuration file for AiderAgent
+# Configuration file for AiderAgent
 
-# Path to the prompt markdown file that provides the base idea or instructions.
-prompt: "prompt.md"
+# Path to the prompt markdown file
+prompt: "default_prompt.md"
 
-# The model used for code generation.
-coder_model: "deepseek/deepseek-chat"
-
-# The model used for evaluation (often the same as coder_model).
-evaluator_model: "deepseek/deepseek-chat"
-
-# Maximum number of iterations to attempt before giving up.
-max_iterations: 5
-
-# Command to execute the generated code.
-# This command will be run via the shell.
-execution_command: "python run_generated_code.py"
-
-# List of files that Aider is allowed to edit.
-context_editable:
-  - "src/main.py"
-  - "src/utils.py"
-
-# List of files that are read-only.
-context_read_only:
-  - "README.md"
-  - "requirements.txt"
-
-# Evaluator mode, currently only "default" is supported.
-evaluator: "default"
+# Model configurations
 coder_model: "deepseek-coder-33b-instruct"
 evaluator_model: "deepseek-coder-33b-instruct"
+
+# Execution settings
 max_iterations: 3
 execution_command: "python src/main.py"
+
+# File access controls
 context_editable:
   - "src/main.py"
   - "src/utils.py"
 context_read_only:
   - "README.md"
   - "requirements.txt"
+
+# Evaluation settings
 evaluator: "default"
-prompt: "default_prompt.md"
