@@ -128,7 +128,7 @@ Please analyze this idea and return a JSON response with the following structure
     "low_level_goals": [
         {{
             "task": "Task description",
-            "prompt": "What prompt would run to complete this task",
+            "prompt": "What instructions you need to complete this task",
             "file": "What file to work on",
             "function": "What function to work on",
             "details": "Additional details for consistency"
@@ -182,7 +182,7 @@ Do not make any code changes. Only return the JSON response.
             for i, task in enumerate(prompt_json.get('low_level_goals', []), 1):
                 structured_prompt += f"{i}. **{task.get('task', '')}**  \n"
                 structured_prompt += "```code-example\n"
-                structured_prompt += f"What prompt would you run to complete this task? {task.get('prompt', '')}\n"
+                structured_prompt += f"What instructions would you need to complete this task? {task.get('prompt', '')}\n"
                 structured_prompt += f"What file do you want to work on? {task.get('file', '')}\n"
                 structured_prompt += f"What function do you want to work on? {task.get('function', '')}\n"
                 structured_prompt += f"What are details you want to add to ensure consistency? {task.get('details', '')}\n"
@@ -194,7 +194,7 @@ Do not make any code changes. Only return the JSON response.
 
     def generate_code(self, prompt: str):
         """
-        Generate code using Aider's Deepseek model.
+        Generate code using Aider.
         This step includes the high-, mid-, and low-level details contained in the prompt.
         """
         console.print("[bold blue][A-C][/] Generating/updating code based on the prompt...", style="italic")
