@@ -20,10 +20,17 @@ from pathlib import Path
 from aider.coders import Coder
 from aider.models import Model
 from aider.io import InputOutput
+from rich.console import Console
+from rich.panel import Panel
+from rich.markdown import Markdown
+from rich.progress import Progress, SpinnerColumn, TextColumn
 import yaml
 import subprocess
 import argparse
 import json
+
+# Initialize rich console
+console = Console()
 
 # Define the structure for the evaluation result (for automated evaluation)
 class EvaluationResult(BaseModel):
@@ -83,7 +90,7 @@ class AiderAgent:
         current_prompt = high_level_idea
         
         for i in range(iterations):
-            print(f"\nIteration {i+1}/{iterations} - Analyzing project structure and refining prompt...")
+            console.print(f"\n[bold cyan]Iteration {i+1}/{iterations}[/] - Analyzing project structure and refining prompt...", style="italic")
             
             analyze_prompt = f"""Analyze the current project structure and this idea: "{current_prompt}"
             
@@ -100,7 +107,7 @@ Return only the improved prompt idea, no other text."""
             improved_idea = self.coder.run(analyze_prompt).strip()
             current_prompt = improved_idea
             
-            print(f"Refined idea: {current_prompt}")
+            console.print(Panel(current_prompt, title="[bold green]Refined Idea", border_style="green"))
             
         # Now generate the final structured prompt
         ask_prompt = f"""Based on thorough analysis of the project structure, implement this idea: "{current_prompt}".
@@ -190,7 +197,7 @@ Do not make any code changes. Only return the JSON response.
         Generate code using Aider's Deepseek model.
         This step includes the high-, mid-, and low-level details contained in the prompt.
         """
-        print("[A-C] Generating/updating code based on the prompt...")
+        console.print("[bold blue][A-C][/] Generating/updating code based on the prompt...", style="italic")
         self.coder.run(prompt)
 
     def execute_code(self) -> str:
@@ -198,7 +205,7 @@ Do not make any code changes. Only return the JSON response.
         Execute the generated code.
         (Steps D & E: Command execution and applying changes.)
         """
-        print("[D-E] Executing the generated code...")
+        console.print("[bold blue][D-E][/] Executing the generated code...", style="italic")
         result = subprocess.run(
             self.config.execution_command.split(),
             capture_output=True,
@@ -223,7 +230,7 @@ Return JSON with the structure: {{
             evaluation_json = json.loads(response)
             evaluation = EvaluationResult(**evaluation_json)
         except Exception as e:
-            print("Error parsing evaluation response:", e)
+            console.print("[bold red]Error parsing evaluation response:[/]", str(e))
             evaluation = EvaluationResult(success=False, feedback="Parsing error")
         return evaluation
 
@@ -233,7 +240,7 @@ Return JSON with the structure: {{
         (Step K: Final automated review.)
         """
         review_prompt = "Perform a final automated review of the updated project. Return JSON with structure: {\"review_passed\": bool}"
-        print("[K] Performing final automated review...")
+        console.print("[bold blue][K][/] Performing final automated review...", style="italic")
         response = self.coder.run(review_prompt)
         try:
             review_json = json.loads(response)
@@ -281,9 +288,9 @@ Do not make any code changes. Only return the JSON response.
         with open('aider_auto_prompt.json', 'w') as f:
             json.dump(prompt_data, f, indent=2)
             
-        print("\nGenerated Structured Prompt:\n")
-        print(structured_prompt)
-        print("\nPrompt saved to: aider_auto_prompt.json")
+        console.print("\n[bold green]Generated Structured Prompt:[/]\n")
+        console.print(Markdown(structured_prompt))
+        console.print("\n[bold]Prompt saved to:[/] aider_auto_prompt.json", style="blue")
         confirm = input("Do you want to run this prompt? (y/n): ").strip().lower()
         if confirm != "y":
             print("Prompt execution canceled.")
@@ -292,27 +299,31 @@ Do not make any code changes. Only return the JSON response.
         # Use the structured prompt for the iterative improvement process.
         evaluation = EvaluationResult(success=False, feedback=None)
         for i in range(self.config.max_iterations):
-            print(f"\n--- Iteration {i+1}/{self.config.max_iterations} ---")
+            console.print(f"\n[bold cyan]{'='*20} Iteration {i+1}/{self.config.max_iterations} {'='*20}[/]")
 
             # Generate (and update) code based on the structured prompt
             self.generate_code(structured_prompt)
 
             # Execute the generated code
             output = self.execute_code()
-            print("Execution Output:\n", output)
+            console.print(Panel(output, title="[bold blue]Execution Output", border_style="blue"))
 
             # Evaluate the output
             evaluation = self.evaluate_output(output)
-            print("Evaluation Result:", evaluation)
+            console.print(Panel(
+                f"Success: {evaluation.success}\nFeedback: {evaluation.feedback or 'None'}", 
+                title="[bold yellow]Evaluation Result", 
+                border_style="yellow"
+            ))
 
             if evaluation.success:
-                print("Automated evaluation indicates success!")
+                console.print("[bold green]✓ Automated evaluation indicates success![/]")
                 break
             else:
-                print("Automated evaluation did not meet goals.")
+                console.print("[bold red]✗ Automated evaluation did not meet goals.[/]")
                 if evaluation.feedback:
-                    print("Feedback:", evaluation.feedback)
-                print("Repeating the automated process with updated code generation...\n")
+                    console.print(f"[yellow]Feedback:[/] {evaluation.feedback}")
+                console.print("[italic]Repeating the automated process with updated code generation...[/]\n")
 
         if evaluation.success:
             # Final automated review (Step K)
