@@ -182,8 +182,25 @@ Return JSON with the structure: {{
 
         # Step 2: Build a structured prompt using Aider's chat (simulating /ask).
         structured_prompt = self.build_structured_prompt(high_level_idea)
+        
+        # Save the prompt to JSON file
+        prompt_data = json.loads(self.coder.run(f"""I have the following high-level idea: "{high_level_idea}".
+Please analyze this idea and return a JSON response with the following structure:
+{{
+    "high_level": "Overall vision and objectives",
+    "mid_level": "Components and intermediate steps",
+    "low_level": "Detailed actionable tasks with examples"
+}}
+
+Do not make any code changes. Only return the JSON response.
+"""))
+        
+        with open('aider_auto_prompt.json', 'w') as f:
+            json.dump(prompt_data, f, indent=2)
+            
         print("\nGenerated Structured Prompt:\n")
         print(structured_prompt)
+        print("\nPrompt saved to: aider_auto_prompt.json")
         confirm = input("Do you want to run this prompt? (y/n): ").strip().lower()
         if confirm != "y":
             print("Prompt execution canceled.")
