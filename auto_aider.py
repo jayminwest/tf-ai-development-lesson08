@@ -47,6 +47,9 @@ class AiderAgentConfig(BaseModel):
     context_editable: List[str]
     context_read_only: List[str]
     evaluator: Literal["default"]
+    program_type: Literal["script", "long_running"] = "script"
+    startup_timeout: int = 5  # seconds to wait for program to start
+    health_check_command: Optional[str] = None  # e.g., "curl http://localhost:8000/health"
 
 class AiderAgent:
     """Autonomous Code Generation and Iterative Improvement System"""
@@ -200,18 +203,69 @@ Do not make any code changes. Only return the JSON response.
         console.print("[bold blue][A-C][/] Generating/updating code based on the prompt...", style="italic")
         self.coder.run(prompt)
 
+    def _check_program_startup(self) -> str:
+        """Check if the program starts successfully within timeout period."""
+        try:
+            process = subprocess.Popen(
+                self.config.execution_command.split(),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            
+            try:
+                stdout, stderr = process.communicate(timeout=self.config.startup_timeout)
+                return stdout + stderr
+            except subprocess.TimeoutExpired:
+                process.kill()  # Clean up the process
+                return f"Program started successfully and remained running for {self.config.startup_timeout} seconds."
+                
+        except Exception as e:
+            return f"Error executing program: {str(e)}"
+
+    def _perform_health_check(self) -> str:
+        """Perform health check if configured."""
+        if not self.config.health_check_command:
+            return "No health check configured"
+            
+        try:
+            result = subprocess.run(
+                self.config.health_check_command.split(),
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            return f"Health check {'passed' if result.returncode == 0 else 'failed'}"
+        except subprocess.TimeoutExpired:
+            return "Health check timed out"
+        except Exception as e:
+            return f"Health check error: {str(e)}"
+
     def execute_code(self) -> str:
         """
-        Execute the generated code.
+        Execute the generated code based on program type.
         (Steps D & E: Command execution and applying changes.)
         """
         console.print("[bold blue][D-E][/] Executing the generated code...", style="italic")
-        result = subprocess.run(
-            self.config.execution_command.split(),
-            capture_output=True,
-            text=True,
-        )
-        return result.stdout + result.stderr
+        
+        if self.config.program_type == "long_running":
+            # Start program and verify it runs
+            startup_result = self._check_program_startup()
+            
+            # If health check command is configured, use it
+            if self.config.health_check_command:
+                health_result = self._perform_health_check()
+                return f"{startup_result}\nHealth Check: {health_result}"
+                
+            return startup_result
+        else:
+            # Original behavior for regular scripts
+            result = subprocess.run(
+                self.config.execution_command.split(),
+                capture_output=True,
+                text=True,
+            )
+            return result.stdout + result.stderr
 
     def evaluate_output(self, execution_output: str) -> EvaluationResult:
         """
