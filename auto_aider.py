@@ -44,7 +44,7 @@ class AiderAgentConfig(BaseModel):
 class AiderAgent:
     """Autonomous Code Generation and Iterative Improvement System"""
 
-    def __init__(self, config_path: str = "aider_agent_config.yaml", prompt_path: Optional[str] = None):
+    def __init__(self, config_path: str = "auto_aider_config.yaml", prompt_path: Optional[str] = None):
         self.config = self._validate_config(Path(config_path), prompt_path)
         # Initialize Aider's coder (using the model specified in the config)
         self.coder = Coder.create(
