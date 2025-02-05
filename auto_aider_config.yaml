@@ -11,6 +11,11 @@ evaluator_model: "sonnet"
 max_iterations: 3
 execution_command: "python3 src/main.py"
 
+# Program type and monitoring
+program_type: "script"  # Options: "script" or "long_running"
+startup_timeout: 5  # seconds to wait for program startup
+health_check_command: null  # e.g. "curl http://localhost:8000/health"
+
 # File access controls
 context_editable:
   - "src/main.py"
