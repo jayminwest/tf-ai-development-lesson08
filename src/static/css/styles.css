@@ -1,0 +1,32 @@
+/* Custom styles for Wikipedia Article Summarizer */
+
+.container {
+    max-width: 800px;
+}
+
+#articleText {
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+}
+
+#summaryText {
+    white-space: pre-wrap;
+}
+
+.spinner-border {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+.alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    min-width: 300px;
+}
