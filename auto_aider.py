@@ -29,16 +29,37 @@ import subprocess
 import argparse
 import json
 
-# Initialize rich console
+# Initialize rich console for pretty output
 console = Console()
 
-# Define the structure for the evaluation result (for automated evaluation)
 class EvaluationResult(BaseModel):
+    """
+    Structured result from code evaluation process.
+    
+    Attributes:
+        success: Whether the evaluation passed successfully
+        feedback: Optional feedback message explaining the result
+    """
     success: bool
     feedback: Optional[str]
 
-# Configuration schema for the Aider Agent
 class AiderAgentConfig(BaseModel):
+    """
+    Configuration schema for the Aider Agent.
+    
+    Attributes:
+        prompt: The template prompt to use for code generation
+        coder_model: The AI model to use for code generation
+        evaluator_model: The AI model to use for evaluation
+        max_iterations: Maximum number of improvement iterations
+        execution_command: Command to execute the generated code
+        context_editable: List of files that can be modified
+        context_read_only: List of files that should not be modified
+        evaluator: Type of evaluator to use (currently only "default")
+        program_type: Type of program ("script" or "long_running")
+        startup_timeout: Seconds to wait for program startup
+        health_check_command: Optional command to verify program health
+    """
     prompt: str
     coder_model: str
     evaluator_model: str
@@ -48,8 +69,8 @@ class AiderAgentConfig(BaseModel):
     context_read_only: List[str]
     evaluator: Literal["default"]
     program_type: Literal["script", "long_running"] = "script"
-    startup_timeout: int = 5  # seconds to wait for program to start
-    health_check_command: Optional[str] = None  # e.g., "curl http://localhost:8000/health"
+    startup_timeout: int = 5
+    health_check_command: Optional[str] = None
 
 class AiderAgent:
     """Autonomous Code Generation and Iterative Improvement System"""
