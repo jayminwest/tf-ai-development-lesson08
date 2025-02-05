@@ -14,20 +14,25 @@ to run it. Once confirmed, it uses the structured prompt for code generation,
 execution, and evaluation in an iterative process.
 """
 
-from pydantic import BaseModel
-from typing import Optional, List, Literal
+# Standard library imports
+import argparse
+import json
+import subprocess
 from pathlib import Path
-from aider.coders import Coder
-from aider.models import Model
-from aider.io import InputOutput
+from typing import Optional, List, Literal
+
+# Third-party imports
+import yaml
+from pydantic import BaseModel
 from rich.console import Console
 from rich.panel import Panel
 from rich.markdown import Markdown
 from rich.progress import Progress, SpinnerColumn, TextColumn
-import yaml
-import subprocess
-import argparse
-import json
+
+# Aider-specific imports
+from aider.coders import Coder
+from aider.models import Model
+from aider.io import InputOutput
 
 # Initialize rich console for pretty output
 console = Console()
