@@ -89,8 +89,7 @@ class AiderAgent:
             fnames=self.config.context_editable,
             read_only_fnames=self.config.context_read_only,
             auto_commits=False,
-            suggest_shell_commands=False,
-            chat_mode="architect"
+            suggest_shell_commands=False
         )
 
     def _validate_config(self, config_path: Path, prompt_path: Optional[str] = None) -> AiderAgentConfig:
