@@ -1,10 +1,1 @@
-# Default Prompt Template
-
-This is a default prompt template that provides basic structure for code generation tasks.
-
-## Guidelines
-
-- Follow clean code principles
-- Include appropriate error handling
-- Add documentation and type hints
-- Write unit tests for new functionality
+This project is a web-based text analysis tool specifically designed to summarize Wikipedia articles. Users can fetch any Wikipedia article with the wikipedia api and press a button to summarize it using Large Language Models. The system is minimal and built using Flask for the web framework, with a minimal JavaScript frontend that allows for dynamic interaction without page reloads, and it employs NLTK for text processing alongside async capabilities for handling concurrent operations. The architecture is modular and extensible, featuring a unique button-based system that allows for easy addition of new summary types. There should be no testing infrastructure to start.
