@@ -1,0 +1,23 @@
+# Configuration file for AiderAgent
+
+# Path to the prompt markdown file
+prompt: "default_prompt.md"
+
+# Model configurations
+coder_model: "sonnet"
+evaluator_model: "sonnet"
+
+# Execution settings
+max_iterations: 3
+execution_command: "python3 src/main.py"
+
+# File access controls
+context_editable:
+  - "src/main.py"
+  - "src/utils.py"
+  - "requirements.txt"
+context_read_only:
+  - "README.md"
+
+# Evaluation settings
+evaluator: "default"
