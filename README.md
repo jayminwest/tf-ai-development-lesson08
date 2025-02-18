@@ -46,7 +46,7 @@ By the end of this lesson, you'll see how Aider can be used **at scale** to stre
 
 - **Executing the Automator:**
   ```sh
-  python Automator.py
+  python auto-aider.py
   ```
 - Provide a **high-level project description**, and Aider will auto-generate the complete **Wikipedia Summarization Project**!
 
